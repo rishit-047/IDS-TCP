@@ -15,7 +15,7 @@ def read_ip_file(filename):
 def is_nimda_worm(packet):
     if packet.haslayer(TCP) and packet[TCP].dport == 80: # It checks if the packet has a TCP layer and the destination port of the packet is port 80 (which is standard fo the HTTP traffic)
         payload = packet[TCP].payload # Extracts the payload (data) of the TCP layer
-        return "GET/scripts/root.exe" in str(payload) # Converts the payload into string and checks if it has the path GET/scripts/root.exe -> if found True is returned
+        return "GET /scripts/root.exe" in str(payload) # Converts the payload into string and checks if it has the path GET/scripts/root.exe -> if found True is returned
     return False # else false is returned 
 
 def log_event(message):
@@ -43,6 +43,7 @@ def packet_callback(packet):
 		log_event(f"Blocking Nimda source Ip: {src_ip}")
 		return
 	
+	packet_count[src_ip] += 1
 	current_time= time.time()
 	time_interval= current_time - start_time[0]
 	
@@ -71,4 +72,4 @@ if __name__ == "__main__":
 	blocked_ips= set()
 	
 	print("Monitoring network traffic....")
-	sniff(iface="lo", filter="ip", prn= packet_callback, store= 0)
+	sniff(filter="ip", prn= packet_callback)
